@@ -94,7 +94,7 @@ namespace libNUS.WiiU
                 {
                     URLs.Add(new UrlFilenamePair(downloadBase + tmd.TitleID + "/" + content.IDString, content.IDString + ".app"));
 
-                    if(content.HasH3 || await HelperFunctions.FileExistsAtURL(downloadBase + tmd.TitleID + "/" + content.IDString + ".h3"))
+                    if(content.HasH3)
                         URLs.Add(new UrlFilenamePair(downloadBase + tmd.TitleID + "/" + content.IDString + ".h3", content.IDString + ".h3"));
                 }
             }

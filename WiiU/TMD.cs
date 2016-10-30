@@ -21,7 +21,7 @@ namespace libNUS.WiiU
             this.IDString = HelperFunctions.ByteArrayToHexString(ID);
             this.Type = BitConverter.ToUInt16(contentBytes.Skip(0x06).Take(2).Reverse().ToArray(), 0);
             this.Size = BitConverter.ToUInt32(contentBytes.Skip(0x08).Take(8).Reverse().ToArray(),0);
-            this.HasH3 = (this.Type == 0x2003);
+            this.HasH3 = (this.Type & 0x2) > 0;
         }
     }
     public struct TMD
