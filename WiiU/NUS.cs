@@ -13,10 +13,12 @@ namespace libNUS.WiiU
         {
             public readonly string URL;
             public readonly string Filename;
-            public UrlFilenamePair(string URL, string Filename)
+            public readonly long Size;
+            public UrlFilenamePair(string URL, string Filename, long Size = -1)
             {
                 this.URL = URL;
                 this.Filename = Filename;
+                this.Size = Size;
             }
         }
         public static Byte[] TitleCert
@@ -92,7 +94,7 @@ namespace libNUS.WiiU
                 }
                 foreach (var content in tmd.Content)
                 {
-                    URLs.Add(new UrlFilenamePair(downloadBase + tmd.TitleID + "/" + content.IDString, content.IDString + ".app"));
+                    URLs.Add(new UrlFilenamePair(downloadBase + tmd.TitleID + "/" + content.IDString, content.IDString + ".app", content.Size));
 
                     if(content.HasH3)
                         URLs.Add(new UrlFilenamePair(downloadBase + tmd.TitleID + "/" + content.IDString + ".h3", content.IDString + ".h3"));
