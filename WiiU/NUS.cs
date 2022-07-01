@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -21,13 +20,7 @@ namespace libNUS.WiiU
                 this.Size = Size;
             }
         }
-        public static Byte[] TitleCert
-        {
-            get
-            {
-                return Properties.Resources.WiiUTitleCert;
-            }
-        }
+        public static byte[] TitleCert => Properties.Resources.WiiUTitleCert;
         private static Regex titleKeyValidationPattern = new Regex("^[A-Fa-f0-9]{16}$");
         private static string downloadBase = "http://ccs.cdn.wup.shop.nintendo.net/ccs/download/";
 
@@ -38,43 +31,47 @@ namespace libNUS.WiiU
         public static string GetUpdateID(string TitleID)
         {
             if (!IsTitleIDFormatValid(TitleID))
+            {
                 throw new ArgumentException("Invalid format.", "TitleID");
+            }
 
             char[] chars = TitleID.ToLower().ToCharArray();
             chars[7] = "e"[0];
-            return new String(chars);
+            return new string(chars);
         }
         public static async Task<bool> TitleExists(string TitleID)
         {
-            if (!IsTitleIDFormatValid(TitleID))
-                throw new ArgumentException("Invalid format.", "TitleID");
-
-            return await HelperFunctions.FileExistsAtURL(downloadBase + TitleID + "/tmd");
+            return !IsTitleIDFormatValid(TitleID)
+                ? throw new ArgumentException("Invalid format.", "TitleID")
+                : await HelperFunctions.FileExistsAtURL(downloadBase + TitleID + "/tmd");
         }
         public static async Task<TMD> DownloadTMD(string TitleID)
         {
             if (!IsTitleIDFormatValid(TitleID))
-                throw new ArgumentException("Invalid format.", "TitleID");
-
-            using (WebClient client = new WebClient())
             {
-                TMD tmd = new TMD(await client.DownloadDataTaskAsync(downloadBase + TitleID + "/tmd"));
+                throw new ArgumentException("Invalid format.", "TitleID");
+            }
+
+            using (var client = new WebClient())
+            {
+                var tmd = new TMD(await client.DownloadDataTaskAsync(downloadBase + TitleID + "/tmd"));
                 return tmd;
             }
         }
         public static async Task<bool> TicketExists(string TitleID)
         {
-            if (!IsTitleIDFormatValid(TitleID))
-                throw new ArgumentException("Invalid format.", "TitleID");
-
-            return await HelperFunctions.FileExistsAtURL(downloadBase + TitleID + "/cetk");
+            return !IsTitleIDFormatValid(TitleID)
+                ? throw new ArgumentException("Invalid format.", "TitleID")
+                : await HelperFunctions.FileExistsAtURL(downloadBase + TitleID + "/cetk");
         }
         public static async Task<byte[]> DownloadTicket(string TitleID)
         {
             if (!IsTitleIDFormatValid(TitleID))
+            {
                 throw new ArgumentException("Invalid format.", "TitleID");
+            }
 
-            using (WebClient client = new WebClient())
+            using (var client = new WebClient())
             {
                 byte[] ticket = await client.DownloadDataTaskAsync(downloadBase + TitleID + "/cetk");
                 return ticket;
@@ -85,19 +82,23 @@ namespace libNUS.WiiU
             var URLs = new List<UrlFilenamePair> { };
             if (await TitleExists(tmd.TitleID))
             {
-                if(skipTMD == false)
-                    URLs.Add(new UrlFilenamePair(downloadBase + tmd.TitleID + "/tmd","title.tmd"));
+                if (skipTMD == false)
+                {
+                    URLs.Add(new UrlFilenamePair(downloadBase + tmd.TitleID + "/tmd", "title.tmd"));
+                }
 
                 if (await TicketExists(tmd.TitleID))
                 {
-                    URLs.Add(new UrlFilenamePair(downloadBase + tmd.TitleID + "/cetk","title.tik"));
+                    URLs.Add(new UrlFilenamePair(downloadBase + tmd.TitleID + "/cetk", "title.tik"));
                 }
                 foreach (var content in tmd.Content)
                 {
                     URLs.Add(new UrlFilenamePair(downloadBase + tmd.TitleID + "/" + content.IDString, content.IDString + ".app", content.Size));
 
-                    if(content.HasH3)
+                    if (content.HasH3)
+                    {
                         URLs.Add(new UrlFilenamePair(downloadBase + tmd.TitleID + "/" + content.IDString + ".h3", content.IDString + ".h3"));
+                    }
                 }
             }
             return URLs.ToArray();
@@ -105,16 +106,21 @@ namespace libNUS.WiiU
         public static async Task<UrlFilenamePair[]> GetTitleContentURLs(string TitleID, bool throwError = false)
         {
             if (!IsTitleIDFormatValid(TitleID))
+            {
                 throw new ArgumentException("Invalid format.", "TitleID");
+            }
 
             try
             {
-                TMD tmd = await DownloadTMD(TitleID);
+                var tmd = await DownloadTMD(TitleID);
                 return await GetTitleContentURLs(tmd);
-            } catch(WebException ex)
+            }
+            catch (WebException ex)
             {
                 if (throwError)
+                {
                     throw ex;
+                }
             }
             return new UrlFilenamePair[] { };
         }

@@ -6,46 +6,48 @@ namespace libNUS.WiiU
 {
     public struct TMDContent
     {
-        public readonly Byte[] ID;
+        public readonly byte[] ID;
         public readonly string IDString;
         public readonly ushort Type;
-        public readonly UInt32 Size;
+        public readonly uint Size;
         public readonly bool HasH3;
 
-        public TMDContent(Byte[] contentBytes)
+        public TMDContent(byte[] contentBytes)
         {
             if (contentBytes.Length != 0x30)
+            {
                 throw new ArgumentOutOfRangeException("contentBytes", contentBytes, "Expected 48 bytes, received " + contentBytes.Length);
+            }
 
             this.ID = contentBytes.Take(0x04).ToArray();
-            this.IDString = HelperFunctions.ByteArrayToHexString(ID);
+            this.IDString = HelperFunctions.ByteArrayToHexString(this.ID);
             this.Type = BitConverter.ToUInt16(contentBytes.Skip(0x06).Take(2).Reverse().ToArray(), 0);
-            this.Size = BitConverter.ToUInt32(contentBytes.Skip(0x08).Take(8).Reverse().ToArray(),0);
+            this.Size = BitConverter.ToUInt32(contentBytes.Skip(0x08).Take(8).Reverse().ToArray(), 0);
             this.HasH3 = (this.Type & 0x2) > 0;
         }
     }
     public struct TMD
     {
-        private const Int16 tk = 0x140;
-        private const Int16 contentStart = 0xB04;
+        private const short tk = 0x140;
+        private const short contentStart = 0xB04;
         private const byte contentSize = 0x30;
 
         public readonly TMDContent[] Content;
-        public readonly UInt16 TitleVersion;
-        public readonly Int64 TitleContentSize;
-        public readonly String TitleID;
-        public readonly Byte[] rawBytes;
+        public readonly ushort TitleVersion;
+        public readonly long TitleContentSize;
+        public readonly string TitleID;
+        public readonly byte[] rawBytes;
 
         public TMD(byte[] tmdBytes)
         {
-            TitleContentSize = 0;
-            Int16 contentCount = BitConverter.ToInt16(tmdBytes.Skip(tk + 0x9E).Take(0x02).Reverse().ToArray(), 0);
+            this.TitleContentSize = 0;
+            short contentCount = BitConverter.ToInt16(tmdBytes.Skip(tk + 0x9E).Take(0x02).Reverse().ToArray(), 0);
             var content = new List<TMDContent> { };
-            for (var i = 0; i < contentCount; i++)
+            for (int i = 0; i < contentCount; i++)
             {
-                TMDContent tmdContent = new TMDContent(tmdBytes.Skip(contentStart + (i * contentSize)).Take(contentSize).ToArray());
+                var tmdContent = new TMDContent(tmdBytes.Skip(contentStart + (i * contentSize)).Take(contentSize).ToArray());
                 content.Add(tmdContent);
-                TitleContentSize += tmdContent.Size;
+                this.TitleContentSize += tmdContent.Size;
             }
 
             this.rawBytes = tmdBytes;
@@ -55,11 +57,11 @@ namespace libNUS.WiiU
         }
         public TMD(bool o)
         {
-            Content = new TMDContent[] { };
-            TitleVersion = 0;
-            TitleContentSize = 0;
-            TitleID = "";
-            rawBytes = new Byte[] { };
+            this.Content = new TMDContent[] { };
+            this.TitleVersion = 0;
+            this.TitleContentSize = 0;
+            this.TitleID = "";
+            this.rawBytes = new byte[] { };
         }
     }
 }
