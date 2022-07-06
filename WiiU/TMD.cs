@@ -6,11 +6,35 @@ namespace libNUS.WiiU
 {
     public struct TMDContent
     {
+        /// <summary>
+        /// The ID in hexadecimal form.
+        /// </summary>
         public readonly byte[] ID;
+
+        /// <summary>
+        /// The ID in hexadecimal string form.
+        /// </summary>
         public readonly string IDString;
+
+        /// <summary>
+        /// The content type.
+        /// </summary>
         public readonly ushort Type;
+
+        /// <summary>
+        /// The size of the app.
+        /// </summary>
         public readonly uint Size;
+
+        /// <summary>
+        /// If there is a corresponding .h3 file to the app.
+        /// </summary>
         public readonly bool HasH3;
+
+        /// <summary>
+        /// Hash of the decrypted contents.
+        /// </summary>
+        public readonly byte[] Sha256Hash;
 
         public TMDContent(byte[] contentBytes)
         {
@@ -24,6 +48,7 @@ namespace libNUS.WiiU
             this.Type = BitConverter.ToUInt16(contentBytes.Skip(0x06).Take(2).Reverse().ToArray(), 0);
             this.Size = BitConverter.ToUInt32(contentBytes.Skip(0x08).Take(8).Reverse().ToArray(), 0);
             this.HasH3 = (this.Type & 0x2) > 0;
+            this.Sha256Hash = contentBytes.Skip(0x10).Take(20).ToArray();
         }
     }
     public struct TMD
